@@ -4,6 +4,18 @@ windows master: [![Build status master](https://ci.appveyor.com/api/projects/sta
 
 R.NET is an in-process bridge for the .NET Framework to access the R statistical language. R.NET works on Windows, Linux and MacOS.
 
+## Builds
+
+GitHub Actions |
+:---: |
+[![Github Actions](https://github.com/andrewiom/R.NET/actions/workflows/push.yml/badge.svg?branch=master)](https://github.com/andrewiom/R.NET/actions/workflows/push.yml) |
+
+## NuGet 
+
+Package | Stable | Prerelease
+--- | --- | ---
+RProvider | [![NuGet Badge](https://buildstats.info/nuget/R.NET)](https://www.nuget.org/packages/R.NET/) | [![NuGet Badge](https://buildstats.info/nuget/R.NET?includePreReleases=true)](https://www.nuget.org/packages/R.NET/)
+
 ## License
 
 [MIT](./License.txt)
@@ -14,6 +26,13 @@ On Windows, R.NET requires .NET Framework > 4.6.1 or .NET Core 2.0, and an acces
 On Linux and MacOS, Mono is required, as well as an access to the native R libraries.
 
 ## Getting started
+
+Must run the following on macos to be able to run tests:
+
+```sh
+export LD_LIBRARY_PATH="/Library/Frameworks/R.framework/Resources/lib"
+export R_HOME="/Library/Frameworks/R.framework/Resources"
+```
 
 As of 2017-08
 
