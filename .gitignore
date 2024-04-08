@@ -111,4 +111,3 @@ UpgradeLog*.XML
 .fake/
 .paket/Paket.Restore.targets
 .vs/
-paket.lock
