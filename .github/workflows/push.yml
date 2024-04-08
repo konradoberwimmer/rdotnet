@@ -2,7 +2,7 @@ name: Push to master
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, acm-net6.0 ]
 
 jobs:
   build:
