@@ -479,7 +479,10 @@ namespace RDotNet
             var status = GetFunction<Rf_initialize_R>()(R_argc, R_argv);
             if (status != 0)
                 throw new Exception("A call to Rf_initialize_R returned a non-zero; status=" + status);
-            // Console.WriteLine("Initialize-Rf_initialize_R; R_CStackLimit value is " + GetDangerousInt32("R_CStackLimit"));
+            if (NativeUtility.GetPlatform() == PlatformID.Win32NT)
+                // also workaround for https://github.com/rdotnet/rdotnet/issues/127  : R.dll is intent on overriding R_HOME and PATH even if --no-environ is specified...
+                resetCachedEnvironmentVariables();
+            //         Console.WriteLine("Initialize-Rf_initialize_R; R_CStackLimit value is " + GetDangerousInt32("R_CStackLimit"));
             SetCstackChecking();
 
             // following in RInside: may not be needed.
