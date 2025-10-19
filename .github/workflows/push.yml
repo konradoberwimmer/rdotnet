@@ -1,0 +1,77 @@
+name: Push to master
+
+on:
+  push:
+    branches: [ master, acm-net6.0 ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-latest, ubuntu-20.04 ] #, windows-latest ]
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup R - Ubuntu
+      if: matrix.os == 'ubuntu-20.04'
+      run:   |
+          sudo apt update -qq
+          sudo apt install --no-install-recommends software-properties-common dirmngr
+          wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+          sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+          sudo apt install --no-install-recommends r-base
+    - uses: r-lib/actions/setup-r@v1
+      name: Setup R - Windows / macOS
+      if: matrix.os != 'ubuntu-20.04'
+      with:
+          r-version: '4.0.2'
+    - name: Set R environment variables
+      run:   |
+         if [ "$RUNNER_OS" == "Linux" ]; then
+              mkdir -p ~/.local/lib/R
+              echo "R_LIBS_USER=~/.local/lib/R" >> "$GITHUB_ENV"
+              echo "R_HOME=$(R RHOME)" >> "$GITHUB_ENV"
+         elif [ "$RUNNER_OS" == "macOS" ]; then
+              echo "R_HOME=$(R RHOME)" >> "$GITHUB_ENV"
+         elif [ "$RUNNER_OS" == "Windows" ]; then
+              echo "R_HOME=$(R RHOME)" >> "$GITHUB_ENV"
+              echo "C:\R\R-4.0.2\bin\x64" >> $GITHUB_PATH
+         else
+              echo "$RUNNER_OS not supported"
+              exit 1
+         fi
+      shell: bash
+    - name: Verify R Home
+      run: |
+        Rscript -e 'R.home()'
+        echo "${{ env.R_HOME }}"
+    - name: Install R package dependencies
+      run: Rscript -e "install.packages(c('zoo'), repos = 'http://cran.us.r-project.org')"
+      shell: bash
+    - name: Setup .NET 
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+    - name: Restore tool dependencies
+      run: dotnet tool restore
+    - name: Restore paket dependencies
+      run: dotnet paket restore
+    - name: Restore dependencies
+      run: dotnet restore R.NET.sln
+    - name: Restore dependencies (tests)
+      run: dotnet restore R.NET.Tests.sln
+    - name: Build
+      run: dotnet fake build -t All
+    # - name: Deploy documentation from master
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     personal_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: ./output
+    #     publish_branch: gh-pages
+    #     force_orphan: true
+    # - name: Publish NuGets (if this version not published before)
+    #   if: matrix.os == 'macos-latest'
+    #   run: dotnet nuget push bin/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGETKEY }} --skip-duplicate
