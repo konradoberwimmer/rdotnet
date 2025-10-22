@@ -7,6 +7,7 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Common/AssemblyInfo.cs" />

@@ -512,12 +512,11 @@ namespace RDotNet
             this.isRunning = true;
 
             //Console.WriteLine("Initialize-just before leaving; R_CStackLimit value is " + GetDangerousInt32("R_CStackLimit"));
-
-            if (NativeUtility.GetPlatform() == PlatformID.Win32NT)
-            {
-                // also workaround for https://github.com/rdotnet/rdotnet/issues/127  : R.dll is intent on overriding R_HOME and PATH even if --no-environ is specified...
-                resetCachedEnvironmentVariables();
-            }
+            
+            // Since many attempts to force the embedded R to use PATH from the environment have failed,
+            // I am putting the workaround directly as first statement to be evaluated in the R session.
+            // see https://github.com/rdotnet/rdotnet/issues/151
+            Evaluate($"""Sys.setenv(PATH = paste("{ nativeUtil.RPath.Replace('\\', '/') }", Sys.getenv("PATH"), sep=";"))""");
         }
 
         private StartupParameter DefaultStartupParameter()
