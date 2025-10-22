@@ -81,7 +81,7 @@ namespace RDotNet.NativeLibrary
         {
             if (RPath == null || RHome == null)
                 throw new InvalidOperationException("SetCachedEnvironmentVariables requires R path and home directory to have been specified or detected");
-            SetenvPrepend(RPath);
+            Environment.SetEnvironmentVariable("PATH", AddToEnv(RPath));
             Environment.SetEnvironmentVariable("R_HOME", RHome);
         }
 
@@ -116,7 +116,7 @@ namespace RDotNet.NativeLibrary
 
             if (string.IsNullOrEmpty(rHome))
                 throw new NotSupportedException("R_HOME was not provided and a suitable path could not be found by R.NET");
-            SetenvPrepend(rPath);
+            Environment.SetEnvironmentVariable("PATH", AddToEnv(rPath));
             // It is highly recommended to use the 8.3 short path format on windows.
             // See the manual page of R.home function in R. Solves at least the issue R.NET 97.
             if (platform == PlatformID.Win32NT)
@@ -416,33 +416,12 @@ namespace RDotNet.NativeLibrary
                 return FindRPathFromRegistry();
         }
 
-        private static void SetenvPrepend(string rPath, string envVarName = "PATH")
-        {
-            // this function results from a merge of PR https://rdotnet.codeplex.com/SourceControl/network/forks/skyguy94/PRFork/contribution/7684
-            //  Not sure of the intent, and why a SetDllDirectory was used, where we moved away from. May need discussion with skyguy94
-            //  relying on this too platform-specific way to specify the search path where
-            //  Environment.SetEnvironmentVariable is multi-platform.
-
-            Environment.SetEnvironmentVariable(envVarName, PrependToEnv(rPath, envVarName));
-            /*
-            var platform = GetPlatform();
-            if (platform == PlatformID.Win32NT)
-            {
-               var result = WindowsLibraryLoader.SetDllDirectory(rPath);
-               var buffer = new StringBuilder(100);
-               WindowsLibraryLoader.GetDllDirectory(100, buffer);
-               Console.WriteLine("DLLPath:" + buffer.ToString());
-            }
-            */
-        }
-
-        private static string PrependToEnv(string rPath, string envVarName = "PATH")
+        private static string AddToEnv(string path, string envVarName = "PATH")
         {
             var currentPathEnv = Environment.GetEnvironmentVariable(envVarName);
-            var paths = currentPathEnv.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
-            if (paths[0] == rPath)
-                return currentPathEnv;
-            return rPath + Path.PathSeparator + currentPathEnv;
+            var paths = currentPathEnv?.Split([ Path.PathSeparator ], StringSplitOptions.RemoveEmptyEntries) ?? [];
+            paths = paths.Append(path).Distinct().ToArray();
+            return string.Join(Path.PathSeparator.ToString(), paths);
         }
 
         /// <summary>
