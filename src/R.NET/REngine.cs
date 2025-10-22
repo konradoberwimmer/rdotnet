@@ -517,8 +517,6 @@ namespace RDotNet
             {
                 // also workaround for https://github.com/rdotnet/rdotnet/issues/127  : R.dll is intent on overriding R_HOME and PATH even if --no-environ is specified...
                 resetCachedEnvironmentVariables();
-                // Partial Workaround (hopefully temporary) for https://rdotnet.codeplex.com/workitem/110
-                Evaluate(string.Format("invisible(memory.limit({0}))", (this.parameter.MaxMemorySize / 1048576UL)));
             }
         }
 
