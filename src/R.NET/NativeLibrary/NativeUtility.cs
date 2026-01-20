@@ -420,7 +420,7 @@ namespace RDotNet.NativeLibrary
         {
             var currentPathEnv = Environment.GetEnvironmentVariable(envVarName);
             var paths = currentPathEnv?.Split([ Path.PathSeparator ], StringSplitOptions.RemoveEmptyEntries) ?? [];
-            paths = paths.Append(path).Distinct().ToArray();
+            paths = paths.Prepend(path).Distinct().ToArray();
             return string.Join(Path.PathSeparator.ToString(), paths);
         }
 
