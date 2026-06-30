@@ -657,6 +657,14 @@ namespace RDotNet
         {
             WriteInt32("R_interrupts_pending", 1);
         }
+        
+        /// <summary>
+        /// Clear flag for user interrupt pending.
+        /// </summary>
+        public void ClearUserInterrupt()
+        {
+            WriteInt32("R_interrupts_pending", 0);
+        }
 
         /// <summary>
         /// Gets a symbol defined in the global environment.
